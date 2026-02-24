@@ -123,3 +123,8 @@ try {
 ### Test Project
 For more reference on implementation and use cases refer to the following [project](https://github.com/malhotranaman/FourQDependencyTest.git).
 Noting however that this assumes version 1.0.1, but subsequent versions maintain parity.
+
+## Support
+If you find this library useful, consider sponsoring the project:
+
+[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-pink?style=for-the-badge)](https://github.com/sponsors/malhotranaman)
