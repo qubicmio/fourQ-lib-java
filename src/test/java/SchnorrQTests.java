@@ -104,7 +104,7 @@ public class SchnorrQTests {
     }
 
     @Test
-    void testVeryLargeMessage() throws Exception {
+    void testVeryLargeMessage() {
         byte[] largeMessage = new byte[10_000_000];  // 10 MB
         new java.util.Random().nextBytes(largeMessage);
         boolean result = schnorrQ.schnorrQVerify(VALID_PUBLIC_KEY, VALID_SIGNATURE, ByteArrayUtils.reverseByteArray(largeMessage, Optional.of(REMOVE_LEADING_ZERO)));
@@ -112,7 +112,7 @@ public class SchnorrQTests {
     }
 
     @Test
-    void testValidSignatureRoundTrip() throws Exception {
+    void testValidSignatureRoundTrip() {
         BigInteger sk = VALID_PRIVATE_KEY;
         BigInteger pk = schnorrQ.schnorrQKeyGeneration(sk);
         byte[] msg = ByteArrayUtils.reverseByteArray("api.schnorrQ test message".getBytes(), Optional.of(REMOVE_LEADING_ZERO));
@@ -122,7 +122,7 @@ public class SchnorrQTests {
     }
 
     @Test
-    void testSignatureChangesWithMessage() throws Exception {
+    void testSignatureChangesWithMessage() {
         BigInteger sk = VALID_PRIVATE_KEY;
         BigInteger pk = schnorrQ.schnorrQKeyGeneration(sk);
 
@@ -136,7 +136,7 @@ public class SchnorrQTests {
     }
 
     @Test
-    void testTamperedMessageFailsVerification() throws Exception {
+    void testTamperedMessageFailsVerification() {
         BigInteger sk = VALID_PRIVATE_KEY;
         BigInteger pk = schnorrQ.schnorrQKeyGeneration(sk);
         byte[] msg =  ByteArrayUtils.reverseByteArray("Original".getBytes(), Optional.of(REMOVE_LEADING_ZERO));
@@ -148,7 +148,7 @@ public class SchnorrQTests {
     }
 
     @Test
-    void testLongMessage() throws Exception {
+    void testLongMessage() {
         BigInteger sk = VALID_PRIVATE_KEY;
         BigInteger pk = schnorrQ.schnorrQKeyGeneration(sk);
 
