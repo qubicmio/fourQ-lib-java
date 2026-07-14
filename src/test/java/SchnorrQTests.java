@@ -44,7 +44,8 @@ public class SchnorrQTests {
         } catch (ValidationException e) {
             assertTrue(
                     e.toString().contains("is not set to zero in both the signature") ||
-                            e.toString().contains("Signature must be less than")
+                            e.toString().contains("Signature must be less than") ||
+                            e.toString().contains("Signature scalar S is non-canonical")
             );
         }
     }
@@ -294,7 +295,8 @@ public class SchnorrQTests {
                 // These errors should be thrown for invalid signatures
                 assertTrue(
                         e.toString().contains("is not set to zero in both the signature") ||
-                                e.toString().contains("Signature must be less than")
+                                e.toString().contains("Signature must be less than") ||
+                                e.toString().contains("Signature scalar S is non-canonical")
                 );
             }
         }
