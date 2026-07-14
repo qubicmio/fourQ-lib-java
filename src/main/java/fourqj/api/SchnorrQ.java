@@ -8,8 +8,11 @@ import java.util.function.Supplier;
 
 import fourqj.constants.Params;
 import fourqj.crypto.primitives.HashFunction;
+import fourqj.crypto.core.Curve;
 import fourqj.crypto.core.ECC;
 import fourqj.crypto.primitives.SHA512;
+import fourqj.types.data.F2Element;
+import fourqj.types.point.ExtendedPoint;
 import fourqj.exceptions.ValidationErrors;
 import fourqj.utils.BigIntegerUtils;
 import fourqj.utils.ByteArrayUtils;
@@ -206,6 +209,35 @@ public class SchnorrQ {
     ) throws EncryptionException {
         SchnorrHelper.validateVerifyInputs(publicKey, signature);
 
+        // Fast-path reject of the identity (neutral) point, encoded as 01 00..00 in
+        // little-endian. It is the most dangerous forgeable key: a single forged (R,S)
+        // is valid for EVERY message, with no grinding and no private key. Mask the
+        // sign bit of the top limb (bit 255 of the BigInteger), matching decode().
+        // See qubic/core PR #921.
+        if (publicKey.clearBit(255).equals(BigInteger.ONE.shiftLeft(248))) {
+            return false;
+        }
+
+        // Decode public key (implicitly verifies that it lies on the curve)
+        final FieldPoint decodedPk = CryptoUtils.decode(publicKey);
+
+        // Reject low-order (weak) public keys to prevent signature forgery.
+        // FourQ's group order is 392*r (cofactor 392 = 2^3 * 7^2). Any key whose order
+        // divides 392 (the 392-point cofactor subgroup, including the identity and its
+        // aliases) lets an attacker forge a valid signature without a private key. A
+        // legitimate key has order r, so [392]*A != O; every weak key has [392]*A == O.
+        // See qubic/core PR #921.
+        {
+            ExtendedPoint cofactorMultiple = Curve.pointSetup(decodedPk);
+            cofactorMultiple = Curve.cofactorClearing(cofactorMultiple);       // 392 * A
+            final F2Element x = cofactorMultiple.getX();
+            final BigInteger xReal = FP.PUtil.fpMod1271(x.real);
+            final BigInteger xIm = FP.PUtil.fpMod1271(x.im);
+            if (xReal.signum() == 0 && xIm.signum() == 0) {   // [392]*A == neutral point?
+                return false;
+            }
+        }
+
         // Build verification buffer using BufferBuilder
         final byte[] bytes = BufferBuilder.forMessage(message)
             .copyBigInteger(signature, Key.SIGNATURE_SIZE, Params.noOffset)
@@ -216,7 +248,7 @@ public class SchnorrQ {
         // Compute s*G + H*publicKey using double scalar multiplication
         final FieldPoint affPoint = ECC.eccMulDouble(
                 CryptoUtils.extractSignatureTopBytesReverse(signature),
-                CryptoUtils.decode(publicKey),       // Implicitly checks that public key lies on the curve
+                decodedPk,
                 CryptoOperationChain.hashToBigInteger(hashFunction, bytes, true).execute()
         );
 

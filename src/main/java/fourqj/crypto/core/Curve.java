@@ -92,7 +92,7 @@ public class Curve {
      * @param p the input point P = (X₁,Y₁,Z₁,Ta,Tb) in extended twisted Edwards coordinates,
      *          where T₁ = Ta×Tb corresponds to (X₁:Y₁:Z₁:T₁)
      */
-    static ExtendedPoint cofactorClearing(ExtendedPoint p) {
+    public static ExtendedPoint cofactorClearing(ExtendedPoint p) {
         PreComputedExtendedPoint q = Conversion.r1ToR2(p);  // Converting from (X,Y,Z,Ta,Tb) to (X+Y,Y-X,2Z,2dT)
         p = ECC.eccDouble(p);                                   // P = 2*P using representations (X,Y,Z,Ta,Tb) <- 2*(X,Y,Z)
         p = ECC.eccAdd(q, p);                                   // P = P+Q using representations (X,Y,Z,Ta,Tb) <- (X,Y,Z,Ta,Tb) + (X+Y,Y-X,2Z,2dT)
